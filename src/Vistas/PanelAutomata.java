@@ -22,27 +22,22 @@ import java.util.logging.Logger;
 public class PanelAutomata extends javax.swing.JPanel implements Runnable {
 
     String ejecucion;
-    String inicio;
-    LinkedList<String> procesos;
     LinkedList<String> listo;
     LinkedList<String> bloqueo;
-    ArrayList<Proceso> fin;
-    ArrayList<Grafico> ciclos;
+    ArrayList<String> fin;
     int cuenta;
     String bloquear;
 
     /**
      * Creates new form PanelAutomata
      */
-
     public PanelAutomata() {
         initComponents();
         ejecucion = null;
         listo = new LinkedList();
         bloqueo = new LinkedList();
         fin = new ArrayList();
-        ciclos = FrameMenu.controladora.getCiclos();
-        cuenta = FrameMenu.controladora.getQuantum();
+        cuenta = 0;
         bloquear = "";
     }
 
@@ -109,11 +104,11 @@ public class PanelAutomata extends javax.swing.JPanel implements Runnable {
         }
 
         for (int i = 0; i < this.bloqueo.size(); i++) {
-            g.drawString(listo.get(i), 380, 150 + (i * 10));
+            g.drawString(bloqueo.get(i), 380, 150 + (i * 10));
         }
 
         for (int i = 0; i < this.fin.size(); i++) {
-            g.drawString(fin.get(i).getNombre(), 380, 30 + (i * 10));
+            g.drawString(fin.get(i), 380, 30 + (i * 10));
         }
 
         if (ejecucion != null) {
@@ -145,98 +140,26 @@ public class PanelAutomata extends javax.swing.JPanel implements Runnable {
 
     @Override
     public void run() {
-        int tiempo = 0;
-        int quantum = FrameMenu.controladora.getQuantum();
-        int cantidad = FrameMenu.controladora.Procesos().size();
-        int tiempos[] = new int[cantidad];
-        Iterator<Grafico> ciclo = ciclos.iterator();
-
-        while (fin.size() < cantidad) {
-
-//verificarNuevos(tiempo);
-//            verificarBloqueados(tiempo);
-//            if(ejecucion!=null)
-//            {
-//                if(ejecucion.getBloqueoinicial()==tiempo)
-//                {   
-//                    bloqueo.add(ejecucion);
-//                    tiempos[FrameMenu.controladora.Procesos().indexOf(ejecucion)]+=(quantum-cuenta);
-//                    ejecucion=listo.poll();
-//                    cuenta=quantum;
-//                }                
-//            }
-            if (cuenta == 0) {
-                cuenta = quantum;
-            }
-
-            if (cuenta == quantum) {
-                if (ejecucion != null) {
-                    tiempos[FrameMenu.controladora.Procesos().indexOf(ejecucion)] += quantum;
-                    
-                }
-//                ejecucion=listo.poll();
-                if (ciclo.hasNext()) {
-                    cambiardeEstados(ciclo.next(), tiempos);
-                }
-            }
-            //AgregarBloqueo(tiempo,tiempos);
-            tiempo++;
-            cuenta--;
-            esperar(1);
-        }
-        ejecucion = null;
+        cambiardeEstados();
     }
 
-    private void cambiardeEstados(Grafico ciclo, int[] tiempos) {
-//        for(PintarQuantumGrafico iteracion:ciclo.getPintar())        
-//        {
-//            switch (iteracion.getTipo()) {
-//                case "bloqueo":
-//                    bloqueo.add(buscar(iteracion.getProceso()));
-//                    tiempos[FrameMenu.controladora.Procesos().indexOf(buscar(iteracion.getProceso()))]+=(FrameMenu.controladora.getQuantum()-cuenta);
-//                    cuenta=FrameMenu.controladora.getQuantum();
-//                    listo.remove(buscar(iteracion.getProceso())); 
-//                    bloquear="bloqueo, bloqueo, bloqueo!!!";
-//                    esperar(3);
-//                    bloquear="";
-//                    break;
-//                case "ejecucion":
-//                    if(ejecucion!=null)
-//                        if(!this.bloqueo.contains(ejecucion)&&!this.fin.contains(ejecucion))
-//                            this.listo.add(ejecucion);
-//                    this.ejecucion=buscar(iteracion.getProceso());
-//                    this.listo.remove(ejecucion);
-//                    break;
-//                case "espera":
-//                    //si no funciona poner esta validacion en el else if de arriba
-//                    Proceso p=buscar(iteracion.getProceso());
-//                    this.bloqueo.remove(p);
-//                    if(!listo.contains(p))
-//                        this.listo.add(p);
-//                    break;                
-//                default:
-//                    break;
-//            }
-//        }
-
+    private void cambiardeEstados() {
         for (int i = 0; i < FrameMenu.controladora.getCiclos().size(); i++) {
-            for (int j = 0; j<FrameMenu.controladora.getCiclos().get(i).getPintar().size(); j++) {
+            cuenta =FrameMenu.controladora.getQuantum();
+            for (int j = 0; j < FrameMenu.controladora.getCiclos().get(i).getPintar().size(); j++) {
                 switch (FrameMenu.controladora.getCiclos().get(i).getPintar().get(j).getTipo()) {
-                    
+
                     case "bloqueo":
                         bloqueo.add(FrameMenu.controladora.getCiclos().get(i).getPintar().get(j).getProceso());
-                        //tiempos[FrameMenu.controladora.Procesos().indexOf(p)] += (FrameMenu.controladora.getQuantum() - cuenta);
-                        cuenta = FrameMenu.controladora.getQuantum();
                         listo.remove(FrameMenu.controladora.getCiclos().get(i).getPintar().get(j).getProceso());
                         bloquear = "bloqueo, bloqueo, bloqueo!!!";
-                        esperar(3);
                         bloquear = "";
                         break;
                     case "ejecucion":
-                        this.listo.add(ejecucion);                                                    
+                        this.listo.add(ejecucion);
                         this.ejecucion = FrameMenu.controladora.getCiclos().get(i).getPintar().get(j).getProceso();
                         this.listo.remove(ejecucion);
-                        
+
                         break;
                     case "espera":
                         this.bloqueo.remove(FrameMenu.controladora.getCiclos().get(i).getPintar().get(j).getProceso());
@@ -244,80 +167,31 @@ public class PanelAutomata extends javax.swing.JPanel implements Runnable {
                             this.listo.add(FrameMenu.controladora.getCiclos().get(i).getPintar().get(j).getProceso());
                         }
                         break;
-                    default:
-                        break;
+                }
+                if(FrameMenu.controladora.getCiclos().get(i).getPintar().get(j).getQuantum()==-1)
+                {
+                    esperar(FrameMenu.controladora.getCiclos().get(i).getPintar().get(j).getQuantum());
+                    cuenta=cuenta-FrameMenu.controladora.getCiclos().get(i).getPintar().get(j).getQuantum();
+                }
+                if(FrameMenu.controladora.getCiclos().get(i).getPintar().get(j).getDuracionejecucion()==FrameMenu.controladora.getCiclos().get(i).getPintar().get(j).getTiempoejecucion())
+                {
+                    fin.add(FrameMenu.controladora.getCiclos().get(i).getPintar().get(j).getProceso());
                 }
             }
-            
-        }
-        fin=FramePrincipal.rr;
-        //Bloqueo_Listo(ciclo);
-    }
-
-    private void AgregarBloqueo(int tiempo, int[] tiempos) {
-        for (Proceso proceso : FrameMenu.controladora.Procesos()) {
-            if (proceso.getBloqueoinicial() == tiempo && tiempo > 0) {
-//                bloqueo.add(proceso);
-
-//                if(ejecucion!=proceso)
-//                {
-//                    this.listo.add(ejecucion);
-//                    ejecucion=proceso;
-//                    
-//                    //ejecucion=listo.poll();
-//                    
-//                }
+            for (int k = cuenta; k > 0; k++) {
+                cuenta--;
+                esperar(1);
             }
         }
     }
-
-    private void Bloqueo_Listo(Grafico ciclo) {
-        for (PintarQuantumGrafico iteracion : ciclo.getPintar()) {
-        }
-    }
-
-    private Proceso buscar(String nombre) {
-        for (Proceso x : FrameMenu.controladora.Procesos()) {
-            if (x.getNombre().equals(nombre)) {
-                return x;
-            }
-        }
-        return null;
-    }
-
-//    private void verificarNuevos(int tiempo) {
-//        for (int i = 0; i < procesos.size(); i++) {
-//            if (procesos.get(i).getLlegada() == tiempo) {
-//                listo.add(procesos.remove(i));
-//            }
-//        }
-//    }
 
     private void esperar(int tiempo) {
         try {
             Thread.sleep(tiempo * 1000);
         } catch (InterruptedException ex) {
-            Logger.getLogger(PanelAutomata.class.getName()).log(Level.SEVERE, null, ex);
+            System.out.println(ex.getMessage());
         }
     }
-
-//    private void verificarBloqueados(int tiempo) {
-//        for (int i = 0; i < bloqueo.size(); i++) {
-//            if (bloqueo.get(i).getBloqueofinal() > 0) {
-//                if (bloqueo.get(i).getBloqueofinal() == tiempo) {
-//                    listo.add(bloqueo.remove(i));
-//                }
-//            }
-//        }
-//    }
-
-    private boolean verificarFin(int tiempos[],Proceso proceso) {
-        if (tiempos[FrameMenu.controladora.Procesos().indexOf(proceso)] >= proceso.getDuracion()) {
-            return fin.add(proceso);
-        }
-        return false;
-    }
-
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     // End of variables declaration//GEN-END:variables

@@ -14,12 +14,24 @@ public class PintarQuantumGrafico {
     private String tipo;
     private int quantum;
     private int auxiliar;
+    private int duracionejecucion;
+    private int tiempoejecucion;
 
-    public PintarQuantumGrafico(String proceso, String tipo, int quantum, int auxiliar) {
+    public PintarQuantumGrafico(String proceso, String tipo, int quantum, int auxiliar,int duracionejecucion,int tiempoejecucion) {
         this.proceso = proceso;
         this.tipo = tipo;
         this.quantum=quantum;
         this.auxiliar=auxiliar;
+        this.duracionejecucion=duracionejecucion;
+        this.tiempoejecucion=tiempoejecucion;
+    }
+
+    public int getDuracionejecucion() {
+        return duracionejecucion;
+    }
+
+    public int getTiempoejecucion() {
+        return tiempoejecucion;
     }
 
     public int getAuxiliar() {

@@ -11,7 +11,6 @@ import Modelos.Grafico;
 import Modelos.PintarQuantumGrafico;
 import Modelos.PosicionesProcesosGrafico;
 import Modelos.Proceso;
-import Vistas.FrameMenu;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -180,13 +179,13 @@ public class Controladora1 {
                             contadortiempotemporal = quantum;
                             temporal.setTiempoejecucion(temporal.getTiempoejecucion() + contadortiempotemporal);
                             //Para pintar en la grafica
-                            ciclo.getPintar().add(new PintarQuantumGrafico(temporal.getNombre(), "ejecucion", contadortiempotemporal, 0));
+                            ciclo.getPintar().add(new PintarQuantumGrafico(temporal.getNombre(), "ejecucion", contadortiempotemporal, 0,temporal.getDuracion(),temporal.getTiempoejecucion()));
 
                             for (Proceso proceso : colaprocesos) {
                                 proceso.setTiempoespera(proceso.getTiempoespera() + contadortiempotemporal);
 
                                 //Para pintar grafico
-                                ciclo.getPintar().add(new PintarQuantumGrafico(proceso.getNombre(), "espera", contadortiempotemporal, 0));
+                                ciclo.getPintar().add(new PintarQuantumGrafico(proceso.getNombre(), "espera", contadortiempotemporal, 0,proceso.getDuracion(),proceso.getTiempoejecucion()));
                             }
                             colaprocesos.addLast(temporal);
                             contadortiempo += quantum;
@@ -196,14 +195,14 @@ public class Controladora1 {
                             contadortiempo += contadortiempotemporal;
                             temporal.setTiempoejecucion(temporal.getTiempoejecucion() + contadortiempotemporal);
 
-                            ciclo.getPintar().add(new PintarQuantumGrafico(temporal.getNombre(), "ejecucion", contadortiempotemporal, 0));
+                            ciclo.getPintar().add(new PintarQuantumGrafico(temporal.getNombre(), "ejecucion", contadortiempotemporal, 0,temporal.getDuracion(),temporal.getTiempoejecucion()));
 
                             procesosejecutados.add(temporal);
                             for (Proceso proceso : colaprocesos) {
                                 proceso.setTiempoespera(proceso.getTiempoespera() + contadortiempotemporal);
 
                                 //Para pintar
-                                ciclo.getPintar().add(new PintarQuantumGrafico(proceso.getNombre(), "espera", contadortiempotemporal, 0));
+                                ciclo.getPintar().add(new PintarQuantumGrafico(proceso.getNombre(), "espera", contadortiempotemporal, 0,proceso.getDuracion(),proceso.getTiempoejecucion()));
                             }
                         }
                     }
@@ -221,7 +220,7 @@ public class Controladora1 {
                             procesosbloqueados.get(i).setTiempobloqueado(procesosbloqueados.get(i).getTiempobloqueado() + contadortiempotemporal);
 
                             //Para pintar.
-                            ciclo.getPintar().add(new PintarQuantumGrafico(procesosbloqueados.get(i).getNombre(), "bloqueo", contadortiempotemporal, 0));
+                            ciclo.getPintar().add(new PintarQuantumGrafico(procesosbloqueados.get(i).getNombre(), "bloqueo", contadortiempotemporal, 0,procesosbloqueados.get(i).getDuracion(),procesosbloqueados.get(i).getTiempoejecucion()));
 
                         } else {
                             int aux = contadortiempotemporal - (procesosbloqueados.get(i).getDuracionbloqueo() - procesosbloqueados.get(i).getTiempobloqueado());
@@ -229,19 +228,19 @@ public class Controladora1 {
                             procesosbloqueados.get(i).setTiempobloqueado(procesosbloqueados.get(i).getTiempobloqueado() + contadortiempotemporal);
 
                             //para pintar
-                            ciclo.getPintar().add(new PintarQuantumGrafico(procesosbloqueados.get(i).getNombre(), "bloqueo", -1, contadortiempotemporal));
+                            ciclo.getPintar().add(new PintarQuantumGrafico(procesosbloqueados.get(i).getNombre(), "bloqueo", -1, contadortiempotemporal,procesosbloqueados.get(i).getDuracion(),procesosbloqueados.get(i).getTiempoejecucion()));
 
                             if (!colaprocesos.isEmpty()) {
                                 procesosbloqueados.get(i).setTiempoespera(procesosbloqueados.get(i).getTiempoespera() + aux);
 
                                 //para pintar
-                                ciclo.getPintar().add(new PintarQuantumGrafico(procesosbloqueados.get(i).getNombre(), "espera", -1, aux));
+                                ciclo.getPintar().add(new PintarQuantumGrafico(procesosbloqueados.get(i).getNombre(), "espera", -1, aux,procesosbloqueados.get(i).getDuracion(),procesosbloqueados.get(i).getTiempoejecucion()));
 
                             } else {
                                 procesosbloqueados.get(i).setTiempoejecucion(procesosbloqueados.get(i).getTiempoejecucion() + aux);
 
                                 //para pintar
-                                ciclo.getPintar().add(new PintarQuantumGrafico(procesosbloqueados.get(i).getNombre(), "ejecucion", -1, aux));
+                                ciclo.getPintar().add(new PintarQuantumGrafico(procesosbloqueados.get(i).getNombre(), "ejecucion", -1, aux,procesosbloqueados.get(i).getDuracion(),procesosbloqueados.get(i).getTiempoejecucion()));
                             }
                             colaprocesos.addLast(procesosbloqueados.get(i));
                             procesosbloqueados.remove(i);
