@@ -12,8 +12,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -22,11 +20,10 @@ import java.util.logging.Logger;
 public class PanelAutomata extends javax.swing.JPanel implements Runnable {
 
     String ejecucion;
-    LinkedList<String> listo;
+    LinkedList<String> espera;
     LinkedList<String> bloqueo;
     ArrayList<String> fin;
     int cuenta;
-    String bloquear;
 
     /**
      * Creates new form PanelAutomata
@@ -34,11 +31,10 @@ public class PanelAutomata extends javax.swing.JPanel implements Runnable {
     public PanelAutomata() {
         initComponents();
         ejecucion = null;
-        listo = new LinkedList();
+        espera = new LinkedList();
         bloqueo = new LinkedList();
         fin = new ArrayList();
         cuenta = 0;
-        bloquear = "";
     }
 
     @Override
@@ -55,9 +51,6 @@ public class PanelAutomata extends javax.swing.JPanel implements Runnable {
             g.fillOval(220, 40, diametro, diametro);
             g.setColor(Color.red);
             g.fillOval(350, 130, diametro, diametro);
-
-            g.setColor(Color.red);
-            g.drawString(bloquear, 0, 10);
             g.setColor(Color.BLACK);
             g.drawString("El tiempo de ejecución terminará en: " + cuenta + " seg", 0, 23);
 
@@ -65,13 +58,13 @@ public class PanelAutomata extends javax.swing.JPanel implements Runnable {
             g.drawString(FrameMenu.controladora.getAutomata().getInicio(), 30, 130);
 
             int inicio_listo[] = FrameMenu.controladora.getAutomata().getInicio_listo();
-            g.drawLine(inicio_listo[0], inicio_listo[1], inicio_listo[2], inicio_listo[3]); //Flecha entre inicio y listo
+            g.drawLine(inicio_listo[0], inicio_listo[1], inicio_listo[2], inicio_listo[3]); //Flecha entre inicio y espera
 
             g.drawOval(120, 130, diametro, diametro);
             g.drawString(FrameMenu.controladora.getAutomata().getListo(), 150, 130);
 
             int listo_ejecucion[] = FrameMenu.controladora.getAutomata().getListo_ejecucion();
-            g.drawLine(listo_ejecucion[0], listo_ejecucion[1], listo_ejecucion[2], listo_ejecucion[3]); //Flecha entre listo y ejecucion
+            g.drawLine(listo_ejecucion[0], listo_ejecucion[1], listo_ejecucion[2], listo_ejecucion[3]); //Flecha entre espera y ejecucion
 
             g.drawOval(220, 40, diametro, diametro);
             g.drawString(FrameMenu.controladora.getAutomata().getEjecucion(), 250, 40);
@@ -99,8 +92,8 @@ public class PanelAutomata extends javax.swing.JPanel implements Runnable {
 
     private void pintarListas(Graphics g) {
         g.setColor(Color.BLACK);
-        for (int i = 0; i < this.listo.size(); i++) {
-            g.drawString(listo.get(i), 150, 150 + (i * 10));
+        for (int i = 0; i < this.espera.size(); i++) {
+            g.drawString(espera.get(i), 150, 150 + (i * 10));
         }
 
         for (int i = 0; i < this.bloqueo.size(); i++) {
@@ -144,44 +137,48 @@ public class PanelAutomata extends javax.swing.JPanel implements Runnable {
     }
 
     private void cambiardeEstados() {
+        String temporal=null;
         for (int i = 0; i < FrameMenu.controladora.getCiclos().size(); i++) {
             cuenta =FrameMenu.controladora.getQuantum();
             for (int j = 0; j < FrameMenu.controladora.getCiclos().get(i).getPintar().size(); j++) {
                 switch (FrameMenu.controladora.getCiclos().get(i).getPintar().get(j).getTipo()) {
-
                     case "bloqueo":
                         bloqueo.add(FrameMenu.controladora.getCiclos().get(i).getPintar().get(j).getProceso());
-                        listo.remove(FrameMenu.controladora.getCiclos().get(i).getPintar().get(j).getProceso());
-                        bloquear = "bloqueo, bloqueo, bloqueo!!!";
-                        bloquear = "";
                         break;
                     case "ejecucion":
-                        this.listo.add(ejecucion);
                         this.ejecucion = FrameMenu.controladora.getCiclos().get(i).getPintar().get(j).getProceso();
-                        this.listo.remove(ejecucion);
-
                         break;
                     case "espera":
-                        this.bloqueo.remove(FrameMenu.controladora.getCiclos().get(i).getPintar().get(j).getProceso());
-                        if (!listo.contains(FrameMenu.controladora.getCiclos().get(i).getPintar().get(j).getProceso())) {
-                            this.listo.add(FrameMenu.controladora.getCiclos().get(i).getPintar().get(j).getProceso());
-                        }
+                        espera.add(FrameMenu.controladora.getCiclos().get(i).getPintar().get(j).getProceso());
                         break;
                 }
                 if(FrameMenu.controladora.getCiclos().get(i).getPintar().get(j).getQuantum()==-1)
                 {
-                    esperar(FrameMenu.controladora.getCiclos().get(i).getPintar().get(j).getQuantum());
-                    cuenta=cuenta-FrameMenu.controladora.getCiclos().get(i).getPintar().get(j).getQuantum();
+                    for(int k=0; k<FrameMenu.controladora.getCiclos().get(i).getPintar().get(j).getAuxiliar(); k++)
+                    {
+                        cuenta=cuenta-1;
+                        esperar(1);
+                    }
+                    bloqueo.remove(FrameMenu.controladora.getCiclos().get(i).getPintar().get(j).getProceso());
                 }
                 if(FrameMenu.controladora.getCiclos().get(i).getPintar().get(j).getDuracionejecucion()==FrameMenu.controladora.getCiclos().get(i).getPintar().get(j).getTiempoejecucion())
                 {
-                    fin.add(FrameMenu.controladora.getCiclos().get(i).getPintar().get(j).getProceso());
+                    temporal=FrameMenu.controladora.getCiclos().get(i).getPintar().get(j).getProceso();
                 }
             }
-            for (int k = cuenta; k > 0; k++) {
+            for (int k = cuenta; k > 0; k--) {
                 cuenta--;
                 esperar(1);
             }
+            if(temporal!=null)
+            {
+                fin.add(temporal);
+                temporal=null;
+            }
+            espera=new LinkedList<>();
+            bloqueo=new LinkedList<>();
+            ejecucion=null;
+            
         }
     }
 

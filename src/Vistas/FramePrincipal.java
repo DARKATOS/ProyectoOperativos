@@ -36,7 +36,7 @@ public class FramePrincipal extends javax.swing.JFrame {
         Object columnas[] = {"Proceso", "TW", "TE"};
         Object matriz[][] = new Object[FrameMenu.controladora.getProcesos().length + 2][3];
         for (int i = 0; i < matriz.length - 2; i++) {
-            matriz[i][0] = rr.get(i).getNombre();
+            matriz[i][0] =rr.get(i).getNombre();
             matriz[i][1]=rr.get(i).getTiempoespera();
             matriz[i][2]=rr.get(i).getTiempoespera()+rr.get(i).getTiempoejecucion();
         }

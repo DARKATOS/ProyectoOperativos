@@ -11,6 +11,7 @@ import Modelos.Grafico;
 import Modelos.PintarQuantumGrafico;
 import Modelos.PosicionesProcesosGrafico;
 import Modelos.Proceso;
+import Vistas.FrameMenu;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -26,7 +27,6 @@ public class Controladora1 {
     private Proceso procesos[];
     private ArrayList<Grafico> ciclos;
     private ArrayList<PosicionesProcesosGrafico> posiciones;
-    private ArrayList<Proceso>bloqueados;
     private int quantum;
 
     public Controladora1() {
@@ -121,8 +121,8 @@ public class Controladora1 {
             procesos[i] = aux;
             procesos[pos] = aux2;
         }
-    }    
-    
+    }
+
     public ArrayList<Proceso> roundRobin() {
         organizarProcesos();
         int contadortiempo = 0;
@@ -133,8 +133,13 @@ public class Controladora1 {
         ArrayList<Proceso> procesosejecutados = new ArrayList<>();
         ArrayList<Proceso> procesosbloqueados = new ArrayList<>();
         Proceso temporal;
-        this.bloqueados=procesosbloqueados;
         
+        //Para el primer proceso, ya que los demas se deben agregar al final
+        for (int i = 0; i < procesos.length; i++) {
+            if (procesos[i].getLlegada() == contadortiempo) {
+                colaprocesos.addLast(procesos[i]);
+            }
+        }
         while (salida == 1) {
             //estado 0=inicio
             //estado 1=listo
@@ -150,12 +155,6 @@ public class Controladora1 {
                 //Verifica si hay procesos que van iniciar una etapa de bloqueo. y los guarda en un lista de procesos bloqueados
                 //Hace una transicion al estado 2
                 case 1: {
-                    for (int i = 0; i < procesos.length; i++) {
-                        if (procesos[i].getLlegada() == contadortiempo) {
-                            colaprocesos.addLast(procesos[i]);
-                        }//esto es para añadir a lo ultimoademas pra entender los machetazos de jorge
-                    }
-
                     for (int i = 0; i < colaprocesos.size(); i++) {
                         //Problema porque si hay procesos que son menores a contadortiempo pero se bloquean que se hace?
                         if (colaprocesos.get(i).getBloqueoinicial() == contadortiempo && colaprocesos.get(i).getBloqueofinal() > contadortiempo) {
@@ -179,30 +178,30 @@ public class Controladora1 {
                             contadortiempotemporal = quantum;
                             temporal.setTiempoejecucion(temporal.getTiempoejecucion() + contadortiempotemporal);
                             //Para pintar en la grafica
-                            ciclo.getPintar().add(new PintarQuantumGrafico(temporal.getNombre(), "ejecucion", contadortiempotemporal, 0,temporal.getDuracion(),temporal.getTiempoejecucion()));
+                            ciclo.getPintar().add(new PintarQuantumGrafico(temporal.getNombre(), "ejecucion", contadortiempotemporal, 0, temporal.getDuracion(), temporal.getTiempoejecucion()));
 
                             for (Proceso proceso : colaprocesos) {
                                 proceso.setTiempoespera(proceso.getTiempoespera() + contadortiempotemporal);
 
                                 //Para pintar grafico
-                                ciclo.getPintar().add(new PintarQuantumGrafico(proceso.getNombre(), "espera", contadortiempotemporal, 0,proceso.getDuracion(),proceso.getTiempoejecucion()));
+                                ciclo.getPintar().add(new PintarQuantumGrafico(proceso.getNombre(), "espera", contadortiempotemporal, 0, proceso.getDuracion(), proceso.getTiempoejecucion()));
                             }
                             colaprocesos.addLast(temporal);
-                            contadortiempo += quantum;
+//                            contadortiempo += quantum;
 
                         } else {
                             contadortiempotemporal = temporal.getDuracion() - temporal.getTiempoejecucion();
-                            contadortiempo += contadortiempotemporal;
+//                            contadortiempo += contadortiempotemporal;
                             temporal.setTiempoejecucion(temporal.getTiempoejecucion() + contadortiempotemporal);
 
-                            ciclo.getPintar().add(new PintarQuantumGrafico(temporal.getNombre(), "ejecucion", contadortiempotemporal, 0,temporal.getDuracion(),temporal.getTiempoejecucion()));
+                            ciclo.getPintar().add(new PintarQuantumGrafico(temporal.getNombre(), "ejecucion", contadortiempotemporal, 0, temporal.getDuracion(), temporal.getTiempoejecucion()));
 
                             procesosejecutados.add(temporal);
                             for (Proceso proceso : colaprocesos) {
                                 proceso.setTiempoespera(proceso.getTiempoespera() + contadortiempotemporal);
 
                                 //Para pintar
-                                ciclo.getPintar().add(new PintarQuantumGrafico(proceso.getNombre(), "espera", contadortiempotemporal, 0,proceso.getDuracion(),proceso.getTiempoejecucion()));
+                                ciclo.getPintar().add(new PintarQuantumGrafico(proceso.getNombre(), "espera", contadortiempotemporal, 0, proceso.getDuracion(), proceso.getTiempoejecucion()));
                             }
                         }
                     }
@@ -220,7 +219,7 @@ public class Controladora1 {
                             procesosbloqueados.get(i).setTiempobloqueado(procesosbloqueados.get(i).getTiempobloqueado() + contadortiempotemporal);
 
                             //Para pintar.
-                            ciclo.getPintar().add(new PintarQuantumGrafico(procesosbloqueados.get(i).getNombre(), "bloqueo", contadortiempotemporal, 0,procesosbloqueados.get(i).getDuracion(),procesosbloqueados.get(i).getTiempoejecucion()));
+                            ciclo.getPintar().add(new PintarQuantumGrafico(procesosbloqueados.get(i).getNombre(), "bloqueo", contadortiempotemporal, 0, procesosbloqueados.get(i).getDuracion(), procesosbloqueados.get(i).getTiempoejecucion()));
 
                         } else {
                             int aux = contadortiempotemporal - (procesosbloqueados.get(i).getDuracionbloqueo() - procesosbloqueados.get(i).getTiempobloqueado());
@@ -228,23 +227,24 @@ public class Controladora1 {
                             procesosbloqueados.get(i).setTiempobloqueado(procesosbloqueados.get(i).getTiempobloqueado() + contadortiempotemporal);
 
                             //para pintar
-                            ciclo.getPintar().add(new PintarQuantumGrafico(procesosbloqueados.get(i).getNombre(), "bloqueo", -1, contadortiempotemporal,procesosbloqueados.get(i).getDuracion(),procesosbloqueados.get(i).getTiempoejecucion()));
+                            ciclo.getPintar().add(new PintarQuantumGrafico(procesosbloqueados.get(i).getNombre(), "bloqueo", -1, contadortiempotemporal, procesosbloqueados.get(i).getDuracion(), procesosbloqueados.get(i).getTiempoejecucion()));
 
                             if (!colaprocesos.isEmpty()) {
                                 procesosbloqueados.get(i).setTiempoespera(procesosbloqueados.get(i).getTiempoespera() + aux);
 
                                 //para pintar
-                                ciclo.getPintar().add(new PintarQuantumGrafico(procesosbloqueados.get(i).getNombre(), "espera", -1, aux,procesosbloqueados.get(i).getDuracion(),procesosbloqueados.get(i).getTiempoejecucion()));
+                                ciclo.getPintar().add(new PintarQuantumGrafico(procesosbloqueados.get(i).getNombre(), "espera", -1, aux, procesosbloqueados.get(i).getDuracion(), procesosbloqueados.get(i).getTiempoejecucion()));
 
                             } else {
                                 procesosbloqueados.get(i).setTiempoejecucion(procesosbloqueados.get(i).getTiempoejecucion() + aux);
 
                                 //para pintar
-                                ciclo.getPintar().add(new PintarQuantumGrafico(procesosbloqueados.get(i).getNombre(), "ejecucion", -1, aux,procesosbloqueados.get(i).getDuracion(),procesosbloqueados.get(i).getTiempoejecucion()));
+                                ciclo.getPintar().add(new PintarQuantumGrafico(procesosbloqueados.get(i).getNombre(), "ejecucion", -1, aux, procesosbloqueados.get(i).getDuracion(), procesosbloqueados.get(i).getTiempoejecucion()));
                             }
                             colaprocesos.addLast(procesosbloqueados.get(i));
                             procesosbloqueados.remove(i);
-                            contadortiempo += contadortiempotemporal;
+//                            contadortiempo += contadortiempotemporal;
+//                            contadortiempo+=aux;
                         }
                     }
                     estado = 4;
@@ -252,6 +252,12 @@ public class Controladora1 {
                 }
                 //Verifico si la cola de procesos esta vacia, quiere decir que ya todos los procesos se ejecutaron
                 case 4: {
+                    contadortiempo+=quantum;
+                    for (int i = 0; i < procesos.length; i++) {
+                        if (procesos[i].getLlegada() == contadortiempo) {
+                            colaprocesos.addLast(procesos[i]);
+                        }
+                    }
                     if (colaprocesos.isEmpty() && procesosbloqueados.isEmpty()) {
                         salida = 0;
                     } else {
@@ -264,17 +270,11 @@ public class Controladora1 {
         }
         return procesosejecutados;
     }
-    
-    public LinkedList<Proceso> Procesos()
-    {
-        LinkedList<Proceso> procesos=new LinkedList();
+
+    public LinkedList<Proceso> Procesos() {
+        LinkedList<Proceso> procesos = new LinkedList();
         procesos.addAll(Arrays.asList(this.procesos));
         return procesos;
     }
 
-    public ArrayList<Proceso> getBloqueados() {
-        return bloqueados;
-    }
-    
-    
 }
